@@ -30,12 +30,12 @@ async fn run() {
 
                 // Handle commands
                 match Command::parse(message_text, "CodeDetectorBot") {
-                    Some((command, _)) =>
+                    Ok(command) =>
                         {
                             command_answer(&message, command).await.log_on_error().await;
                             return
                         },
-                    None => ()
+                    Err(_) => ()
                 };
 
                 // Handle code formatting
@@ -55,7 +55,7 @@ async fn run() {
 }
 
 async fn command_answer(
-    cx: &DispatcherHandlerCx<Message>,
+    cx: &UpdateWithCx<Message>,
     command: Command,
 ) -> ResponseResult<()> {
     static HELP_TEXT : &str = "Для форматирования однострочной конструкции используйте\

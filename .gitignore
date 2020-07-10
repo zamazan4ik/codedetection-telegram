@@ -31,6 +31,8 @@
 *.out
 *.app
 
+# IDE specific
+.idea/
 
 #Added by cargo
 
