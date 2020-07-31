@@ -1,4 +1,5 @@
-use lazy_static::lazy_static;
+use once_cell::sync::OnceCell;
+use once_cell_regex::regex;
 use regex::Regex;
 use teloxide::{prelude::*, types::*, utils::command::BotCommand};
 
@@ -94,23 +95,91 @@ fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
 }
 
 fn is_code_detected(text: &str) -> bool {
-    lazy_static! {
-        static ref KEYWORDS: [&'static str; 79] = ["namespace", "main", "cout", "cin", "printf", "scanf", "include",
-        "import", "while", "for", "async", "await", "yield", "concept", "alignas", "alignof",
-        "and", "and_eq", "asm", "atomic", "auto", "bitand", "bitor", "bool", "break", "case",
-        "catch", "char", "class", "compl", "const", "continue", "decltype", "declval", "default", "define",
-        "delete", "new", "alloc", "free", "_cast", "if", "else", "enum", "explicit", "export", "extern",
-        "friend", "goto", "mutable", "nullptr", "noexcept", "private", "protected", "public", "register",
-        "requires", "return", "static", "assert", "struct", "switch", "template", "thread", "throw",
-        "typedef", "using", "volatile", "typename", "union", "typeid", "virtual", "module", "final",
-        "override", "int", "float", "double", "void"];
-
-        static ref RE: Regex = Regex::new(&KEYWORDS.join("|")).unwrap();
-    }
+    static INSTANCE: OnceCell<[&'static str; 76]> = OnceCell::new();
+    let re : &Regex = regex!(INSTANCE.get_or_init(|| {
+        [
+            "namespace",
+            "main",
+            "cout",
+            "cin",
+            "printf",
+            "scanf",
+            "#include",
+            "import",
+            "while",
+            "for",
+            "async",
+            "await",
+            "yield",
+            "concept",
+            "alignas",
+            "alignof",
+            "asm",
+            "atomic",
+            "auto",
+            "bitand",
+            "bitor",
+            "bool",
+            "break",
+            "case",
+            "catch",
+            "class",
+            "compl",
+            "const",
+            "continue",
+            "decltype",
+            "declval",
+            "default",
+            "define",
+            "delete",
+            "new",
+            "malloc",
+            "free",
+            "_cast",
+            "if",
+            "else",
+            "enum",
+            "explicit",
+            "export",
+            "extern",
+            "friend",
+            "goto",
+            "mutable",
+            "nullptr",
+            "noexcept",
+            "private",
+            "protected",
+            "public",
+            "register",
+            "requires",
+            "return",
+            "static",
+            "assert",
+            "struct",
+            "switch",
+            "template",
+            "thread",
+            "throw",
+            "typedef",
+            "using",
+            "volatile",
+            "typename",
+            "union",
+            "typeid",
+            "virtual",
+            "module",
+            "final",
+            "override",
+            "float",
+            "double",
+            "void",
+            "vector"
+        ]
+    }).join("|").as_str());
 
     // Just a random number, high enough
-    const THRESHOLD: usize = 2;
-    if RE.find_iter(text).count() > THRESHOLD {
+    const THRESHOLD: usize = 3;
+    if re.find_iter(text).count() > THRESHOLD {
         return true;
     }
 
