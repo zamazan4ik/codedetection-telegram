@@ -1,7 +1,7 @@
+use teloxide::types::*;
 use once_cell::sync::OnceCell;
 use once_cell_regex::regex;
 use regex::Regex;
-use teloxide::types::*;
 
 pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
     let entities = match maybe_entities {
@@ -102,7 +102,7 @@ pub fn is_code_detected(text: &str) -> bool {
         ]
     }).join("|").as_str());
 
-    // Just a random number, high enough
+    // Just a random number, high enough to reduce false positives count
     const THRESHOLD: usize = 3;
     if re.find_iter(text).count() > THRESHOLD {
         return true;
