@@ -1,5 +1,6 @@
-mod detection;
 mod commands;
+mod detection;
+mod utils;
 
 use teloxide::{prelude::*, utils::command::BotCommand};
 
@@ -25,14 +26,13 @@ async fn run() {
         .messages_handler(|rx: DispatcherHandlerRx<Message>| {
             rx.for_each(move |message| {
                 let bot_responses_to_messages = bot_responses_to_messages.clone();
-
                 async move {
                     let message_text = match message.update.text() {
                         Some(x) => x,
                         None => return,
                     };
 
-                    // Handle commands
+                    // Handle commands. If command cannot be parsed - continue processing
                     match commands::Command::parse(message_text, "CodeDetectorBot") {
                         Ok(command) => {
                             commands::command_answer(&message, command).await.log_on_error().await;
@@ -47,24 +47,7 @@ async fn run() {
                     }
 
                     if detection::is_code_detected(message_text) {
-                        static FORMAT_TEXT: &str = "Оберните код в теги: 3 символа ` до и после кода \
-                        (в случае одиночной конструкции достаточно 1 ` с обеих сторон). Спасибо!";
-
-                        let response_message = message
-                            .reply_to(FORMAT_TEXT)
-                            .send()
-                            .await;
-
-                        match response_message {
-                            Ok(extracted_response_message) =>
-                                {
-                                    bot_responses_to_messages
-                                        .lock()
-                                        .unwrap()
-                                        .insert(message.update.id, extracted_response_message.id);
-                                }
-                            Err(_) => { response_message.log_on_error().await; }
-                        };
+                        utils::send_first_notification(&message, bot_responses_to_messages).await;
                     }
                 }
             })
@@ -87,27 +70,14 @@ async fn run() {
                                 .get(&message.update.id)
                                 .cloned();
 
-                        match maybe_bot_answer_id {
-                            Some(response) => {
-                                // Clear all related to the message bot responses
-                                message.bot
-                                    .delete_message(message.chat_id(), response)
-                                    .send()
-                                    .await
-                                    .log_on_error()
-                                    .await;
-
-                                bot_responses_to_messages
-                                    .lock()
-                                    .unwrap()
-                                    .remove(&message.update.id);
-
-                                return;
-                            }
-                            None => { return; }
+                        if let Some(response) = maybe_bot_answer_id {
+                            // Clear all related to the message bot responses
+                            utils::delete_message(&message.bot, message.chat_id(),
+                                                  response, bot_responses_to_messages.clone(),
+                                                  &message.update.id).await;
                         }
                     } else if detection::is_code_detected(message_text) {
-                        // Delete old notification, then create new notification
+                        // Delete old notification, then create a new notification
 
                         let old_notification = bot_responses_to_messages
                             .lock()
@@ -115,41 +85,13 @@ async fn run() {
                             .get(&message.update.id)
                             .cloned();
 
-                        match old_notification {
-                            Some(old_id) => {
-                                message.bot
-                                    .delete_message(message.chat_id(), old_id)
-                                    .send()
-                                    .await
-                                    .log_on_error()
-                                    .await;
-
-                                bot_responses_to_messages
-                                    .lock()
-                                    .unwrap()
-                                    .remove(&message.update.id);
-                            }
-                            None => ()
+                        if let Some(old_id) = old_notification {
+                            utils::delete_message(&message.bot, message.chat_id(),
+                                                  old_id, bot_responses_to_messages.clone(),
+                                                  &message.update.id).await;
                         }
 
-                        static FORMAT_TEXT: &str = "Всё ещё неправильно :( Оберните код в теги: 3 символа ` до и после кода \
-                        (в случае одиночной конструкции достаточно 1 ` с обеих сторон). Спасибо!";
-
-                        let response_message = message
-                            .reply_to(FORMAT_TEXT)
-                            .send()
-                            .await;
-
-                        match response_message {
-                            Ok(extracted_response_message) =>
-                                {
-                                    bot_responses_to_messages
-                                        .lock()
-                                        .unwrap()
-                                        .insert(message.update.id, extracted_response_message.id);
-                                }
-                            Err(_) => { response_message.log_on_error().await; }
-                        };
+                        utils::send_another_notification(&message, bot_responses_to_messages).await;
                     }
                 }
             })
