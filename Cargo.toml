@@ -1,6 +1,6 @@
 [package]
 name = "codedetection-telegram"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Alexander Zaitsev <zamazan4ik@tut.by>"]
 edition = "2018"
 
