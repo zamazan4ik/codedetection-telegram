@@ -34,6 +34,5 @@
 # IDE specific
 .idea/
 
-#Added by cargo
-
+# Added by cargo
 /target
