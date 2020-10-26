@@ -17,7 +17,7 @@ async fn main() {
 
 async fn run() {
     logging::init_logger();
-    log::info!("Starting CodeDetector bot!");
+    log::info!("Starting CodeDetector bot");
 
     let is_webhook_mode_enabled = env::var("WEBHOOK_MODE")
         .unwrap_or("false".to_string())
