@@ -19,7 +19,7 @@ pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
     return false;
 }
 
-pub fn is_code_detected(text: &str) -> bool {
+pub fn is_code_detected(text: &str, threshold: u8) -> bool {
     static INSTANCE: OnceCell<[&'static str; 76]> = OnceCell::new();
     let re: &Regex = regex!(INSTANCE
         .get_or_init(|| {
@@ -105,9 +105,7 @@ pub fn is_code_detected(text: &str) -> bool {
         .join("|")
         .as_str());
 
-    // Just a random number, high enough to reduce false positives count
-    const THRESHOLD: usize = 3;
-    if re.find_iter(text).count() > THRESHOLD {
+    if re.find_iter(text).count() > threshold as usize {
         return true;
     }
 

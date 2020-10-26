@@ -26,13 +26,18 @@ async fn run() {
             "Cannot convert WEBHOOK_MODE to bool. Applicable values are only \"true\" or \"false\"",
         );
 
+    let threshold = env::var("THRESHOLD")
+        .unwrap_or("3".to_string())
+        .parse::<u8>()
+        .expect("Cannot convert THRESHOLD to u8");
+
     let bot = Bot::from_env();
 
     let bot_responses_to_messages = Arc::new(Mutex::new(HashMap::<i32, i32>::new()));
     let bot_responses_to_edited_messages = bot_responses_to_messages.clone();
 
     let bot_dispatcher = Dispatcher::new(bot.clone())
-        .messages_handler(|rx: DispatcherHandlerRx<Message>| {
+        .messages_handler(move |rx: DispatcherHandlerRx<Message>| {
             rx.for_each(move |message| {
                 let bot_responses_to_messages = bot_responses_to_messages.clone();
                 async move {
@@ -58,13 +63,13 @@ async fn run() {
                         return;
                     }
 
-                    if detection::is_code_detected(message_text) {
+                    if detection::is_code_detected(message_text, threshold) {
                         utils::send_first_notification(&message, bot_responses_to_messages).await;
                     }
                 }
             })
         })
-        .edited_messages_handler(|rx: DispatcherHandlerRx<Message>| {
+        .edited_messages_handler(move |rx: DispatcherHandlerRx<Message>| {
             rx.for_each(move |message| {
                 let bot_responses_to_messages = bot_responses_to_edited_messages.clone();
                 async move {
@@ -92,7 +97,7 @@ async fn run() {
                             )
                             .await;
                         }
-                    } else if detection::is_code_detected(message_text) {
+                    } else if detection::is_code_detected(message_text, threshold) {
                         // Delete old notification, then create a new notification
 
                         let old_notification = bot_responses_to_messages
