@@ -1,11 +1,13 @@
 mod commands;
 mod detection;
+mod logging;
 mod utils;
 mod webhook;
 
 use teloxide::{prelude::*, utils::command::BotCommand};
 
 use std::collections::HashMap;
+use std::env;
 use std::sync::{Arc, Mutex};
 
 #[tokio::main]
@@ -14,15 +16,22 @@ async fn main() {
 }
 
 async fn run() {
-    teloxide::enable_logging!();
+    logging::init_logger();
     log::info!("Starting CodeDetector bot!");
+
+    let is_webhook_mode_enabled = env::var("WEBHOOK_MODE")
+        .unwrap_or("false".to_string())
+        .parse::<bool>()
+        .expect(
+            "Cannot convert WEBHOOK_MODE to bool. Applicable values are only \"true\" or \"false\"",
+        );
 
     let bot = Bot::from_env();
 
     let bot_responses_to_messages = Arc::new(Mutex::new(HashMap::<i32, i32>::new()));
     let bot_responses_to_edited_messages = bot_responses_to_messages.clone();
 
-    Dispatcher::new(bot)
+    let bot_dispatcher = Dispatcher::new(bot.clone())
         .messages_handler(|rx: DispatcherHandlerRx<Message>| {
             rx.for_each(move |message| {
                 let bot_responses_to_messages = bot_responses_to_messages.clone();
@@ -107,7 +116,23 @@ async fn run() {
                     }
                 }
             })
-        })
-        .dispatch()
-        .await;
+        });
+
+    if is_webhook_mode_enabled {
+        log::info!("Webhook mode activated");
+        let rx = webhook::webhook(bot);
+        bot_dispatcher
+            .dispatch_with_listener(
+                rx.await,
+                LoggingErrorHandler::with_custom_text("An error from the update listener"),
+            )
+            .await;
+    } else {
+        log::info!("Long polling mode activated");
+        bot.delete_webhook()
+            .send()
+            .await
+            .expect("Cannot delete a webhook");
+        bot_dispatcher.dispatch().await;
+    }
 }
