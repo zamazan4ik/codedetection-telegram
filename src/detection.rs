@@ -3,7 +3,6 @@ use once_cell_regex::regex;
 use regex::Regex;
 use teloxide::types::*;
 
-const
 
 static INSTANCE: OnceCell<[&'static str; 76]> = OnceCell::new();
 
