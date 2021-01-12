@@ -3,6 +3,7 @@ use once_cell_regex::regex;
 use regex::Regex;
 use teloxide::types::*;
 
+
 pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
     let entities = match maybe_entities {
         Some(entities) => entities,
@@ -15,8 +16,7 @@ pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
             _ => (),
         }
     }
-
-    return false;
+    false
 }
 
 pub fn is_code_detected(text: &str, threshold: u8) -> bool {
@@ -104,10 +104,5 @@ pub fn is_code_detected(text: &str, threshold: u8) -> bool {
         })
         .join("|")
         .as_str());
-
-    if re.find_iter(text).count() > threshold as usize {
-        return true;
-    }
-
-    return false;
+    re.find_iter(text).count() > threshold as usize
 }
