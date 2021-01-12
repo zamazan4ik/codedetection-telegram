@@ -152,5 +152,4 @@ async fn run() {
             .expect("Cannot delete a webhook");
     bot_dispatcher.dispatch()
         .await;
-
 }
