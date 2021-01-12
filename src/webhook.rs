@@ -42,7 +42,7 @@ pub async fn webhook(bot: Bot) -> mpsc::UnboundedReceiver<Result<Update, String>
     let host = env::var("HOST").expect("HOST env variable missing");
     let path = match env::var("PATH"){
         Ok(path) => path,
-        Err(e) =>  teloxide_token
+        Err(_e) =>  teloxide_token
     };
     let url = format!("https://{}/{}/api/v1/message", host, path);
 
