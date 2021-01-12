@@ -16,7 +16,7 @@ mod tests {
 
     #[test]
     fn is_code() {
-        assert!(is_code_detected("int main(){std::cout<<hello<<'\n'; return 0;}", 3));
+        assert!(is_code_detected("int main(){int hello = 3; cout<<hello<<'\n'; return 0;}", 2));
     }
 }
 
@@ -41,7 +41,7 @@ async fn run() {
         .parse::<u8>()
         .expect("Cannot convert THRESHOLD to u8");
 
-    let bot: Bot = Bot::from_env();
+    let bot= Bot::from_env();
 
     let bot_responses_to_messages = Arc::new(Mutex::new(HashMap::<i32, i32>::new()));
     let bot_responses_to_edited_messages = bot_responses_to_messages.clone();

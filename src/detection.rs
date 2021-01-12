@@ -3,7 +3,28 @@ use once_cell_regex::regex;
 use regex::Regex;
 use teloxide::types::*;
 
-const KEYWORDS: [&str;77] = [
+const
+
+static INSTANCE: OnceCell<[&'static str; 76]> = OnceCell::new();
+
+pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
+    let entities = match maybe_entities {
+        Some(entities) => entities,
+        None => return false,
+    };
+
+    for entity in entities.iter() {
+        match entity.kind {
+            MessageEntityKind::Code | MessageEntityKind::Pre { .. } => return true,
+            _ => (),
+        }
+    }
+     false
+}
+
+pub fn is_code_detected(text: &str, threshold: u8) -> bool {
+    let re: &Regex = regex!(INSTANCE
+        .get_or_init(||[
     "namespace",
     "main",
     "cout",
@@ -80,29 +101,7 @@ const KEYWORDS: [&str;77] = [
     "double",
     "void",
     "vector",
-    "std::",
-];
-
-static INSTANCE: OnceCell<[&'static str; 77]> = OnceCell::new();
-
-pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
-    let entities = match maybe_entities {
-        Some(entities) => entities,
-        None => return false,
-    };
-
-    for entity in entities.iter() {
-        match entity.kind {
-            MessageEntityKind::Code | MessageEntityKind::Pre { .. } => return true,
-            _ => (),
-        }
-    }
-     false
-}
-
-pub fn is_code_detected(text: &str, threshold: u8) -> bool {
-    let re: &Regex = regex!(INSTANCE
-        .get_or_init(|| KEYWORDS)
+    ])
         .join("|")
         .as_str());
     re.find_iter(text).count() > threshold as usize

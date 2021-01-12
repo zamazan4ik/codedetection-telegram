@@ -5,17 +5,13 @@ use teloxide::Bot;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-static FORMAT_TEXT: &str = "Оберните код в теги: 3 символа ` до и после кода \
-                        (в случае одиночной конструкции достаточно 1 ` с обеих сторон). Спасибо!";
-
-static ERROR_FORMAT_TEXT: &str =
-    "Всё ещё неправильно :( Оберните код в теги: 3 символа ` до и после кода \
-                        (в случае одиночной конструкции достаточно 1 ` с обеих сторон). Спасибо!";
 
 pub async fn send_first_notification(
     message: &UpdateWithCx<Message>,
     response_storage: Arc<Mutex<HashMap<i32, i32>>>,
 ) {
+    static FORMAT_TEXT: &str = "Оберните код в теги: 3 символа ` до и после кода \
+                        (в случае одиночной конструкции достаточно 1 ` с обеих сторон). Спасибо!";
     send_message(message, FORMAT_TEXT, response_storage).await;
 }
 
@@ -23,6 +19,9 @@ pub async fn send_another_notification(
     message: &UpdateWithCx<Message>,
     response_storage: Arc<Mutex<HashMap<i32, i32>>>,
 ) {
+    static ERROR_FORMAT_TEXT: &str =
+        "Всё ещё неправильно :( Оберните код в теги: 3 символа ` до и после кода \
+                        (в случае одиночной конструкции достаточно 1 ` с обеих сторон). Спасибо!";
     send_message(message, ERROR_FORMAT_TEXT, response_storage).await;
 }
 
