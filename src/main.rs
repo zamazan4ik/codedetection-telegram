@@ -10,6 +10,16 @@ use std::collections::HashMap;
 use std::env;
 use std::sync::{Arc, Mutex};
 
+#[cfg(test)]
+mod tests {
+    use crate::detection::is_code_detected;
+
+    #[test]
+    fn is_code() {
+        assert!(is_code_detected("int main(){std::cout<<hello<<'\n'; return 0;}", 3));
+    }
+}
+
 #[tokio::main]
 async fn main() {
     run().await;
@@ -31,7 +41,7 @@ async fn run() {
         .parse::<u8>()
         .expect("Cannot convert THRESHOLD to u8");
 
-    let bot = Bot::from_env();
+    let bot: Bot = Bot::from_env();
 
     let bot_responses_to_messages = Arc::new(Mutex::new(HashMap::<i32, i32>::new()));
     let bot_responses_to_edited_messages = bot_responses_to_messages.clone();
@@ -53,14 +63,14 @@ async fn run() {
                                 .await
                                 .log_on_error()
                                 .await;
-                            return;
+                            ()
                         }
                         Err(_) => (),
                     };
 
                     // If message is formatted - just ignore it
                     if detection::maybe_formatted(message.update.entities()) {
-                        return;
+                        return
                     }
 
                     if detection::is_code_detected(message_text, threshold) {
@@ -132,12 +142,15 @@ async fn run() {
                 LoggingErrorHandler::with_custom_text("An error from the update listener"),
             )
             .await;
-    } else {
-        log::info!("Long polling mode activated");
-        bot.delete_webhook()
+        return
+    }
+
+    log::info!("Long polling mode activated");
+    bot.delete_webhook()
             .send()
             .await
             .expect("Cannot delete a webhook");
-        bot_dispatcher.dispatch().await;
-    }
+    bot_dispatcher.dispatch()
+        .await;
+
 }
