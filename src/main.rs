@@ -41,7 +41,7 @@ async fn run() {
         .parse::<u8>()
         .expect("Cannot convert THRESHOLD to u8");
 
-    let bot= Bot::from_env();
+    let bot = Bot::from_env();
 
     let bot_responses_to_messages = Arc::new(Mutex::new(HashMap::<i32, i32>::new()));
     let bot_responses_to_edited_messages = bot_responses_to_messages.clone();
