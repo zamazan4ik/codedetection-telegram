@@ -4,7 +4,7 @@ use regex::Regex;
 use teloxide::types::*;
 
 
-static INSTANCE: OnceCell<[&'static str; 76]> = OnceCell::new();
+
 
 pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
     let entities = match maybe_entities {
