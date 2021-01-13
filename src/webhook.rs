@@ -38,7 +38,8 @@ pub async fn webhook(bot: Bot) -> mpsc::UnboundedReceiver<Result<Update, String>
         .parse()
         .expect("BIND_PORT value has to be an integer");
 
-    let url = env::var("WEBHOOK_URI").expect("Not detected WEBHOOK_URI set environment variable WEBHOOK_URI to start webhook");
+    let url = env::var("WEBHOOK_URI").expect("WEBHOOK_URI env variable missing");
+
 
     bot.set_webhook(url)
         .send()
