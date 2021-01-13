@@ -38,13 +38,7 @@ pub async fn webhook(bot: Bot) -> mpsc::UnboundedReceiver<Result<Update, String>
         .parse()
         .expect("BIND_PORT value has to be an integer");
 
-    let teloxide_token = env::var("TELOXIDE_TOKEN").expect("TELOXIDE_TOKEN env variable missing");
-    let host = env::var("HOST").expect("HOST env variable missing");
-    let path = match env::var("PATH"){
-        Ok(path) => path,
-        Err(_e) =>  teloxide_token
-    };
-    let url = format!("https://{}/{}/api/v1/message", host, path);
+    let url = env::var("WEBHOOK_URI").expect("Not detected WEBHOOK_URI set environment variable WEBHOOK_URI to start webhook");
 
     bot.set_webhook(url)
         .send()
