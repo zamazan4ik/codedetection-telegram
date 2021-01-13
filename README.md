@@ -25,7 +25,8 @@ The bot can be configured only with environment variables. For now there are we 
 | THRESHOLD | Sets a threshold for code detection algorithm | Any valid `u8` | `3` | All mods |
 | BIND_ADDRESS | Address for binding the web-service | Any valid IP address | `0.0.0.0` | Webhook mode |  
 | BIND_PORT | Port for binding the web-service | Any valid port | `8080` | Webhook mode |
-| WEBHOOK_URI | This variable allows you to set your hook path example **https://example.org/api/v1/Te3_@#ge** |Any valid host+path | None | Webhook mode |
+| HOST | Host, where Telegram will send updates in webhook mode | Any valid host address | None | Webhook mode |
+| WEBHOOK_URI | This variable allows you to set path example **/api/v1/Te3@#ge** | Any valid path | TELOXIDE_TOKEN | Webhook mode |
 
 If for any variable there is no default value and you didn't provide any value - the bot won't start.
 Bot automatically registers webhook (if is launched in webhook mode) with address `https://$HOST/$TELOXIDE_TOKEN/api/v1/message`.
