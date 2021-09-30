@@ -9,7 +9,10 @@ pub enum Command {
     About,
 }
 
-pub async fn command_answer(cx: &UpdateWithCx<Message>, command: Command) -> ResponseResult<()> {
+pub async fn command_answer(
+    cx: &UpdateWithCx<Bot, Message>,
+    command: Command,
+) -> anyhow::Result<()> {
     static HELP_TEXT: &str = "Для форматирования однострочной конструкции используйте\
         обрамление одиночным символом ` с обеих сторон. Для многострочной конструкции используйте\
         обрамление с помощью ``` до и после конструкции. Спасибо!";
