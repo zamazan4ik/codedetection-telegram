@@ -1,4 +1,4 @@
-FROM rust:1.49 as builder
+FROM rust:1.55.0 as builder
 WORKDIR /usr/src/codedetection-telegram
 ARG CODEDETECTION_SOURCE_URL=https://github.com/ZaMaZaN4iK/codedetection-telegram.git
 ARG CACHE_DATE=2020-01-01
