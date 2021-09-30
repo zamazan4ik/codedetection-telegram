@@ -16,7 +16,10 @@ mod tests {
 
     #[test]
     fn is_code() {
-        assert!(is_code_detected("int main(){int hello = 3; cout<<hello<<'\n'; return 0;}", 2));
+        assert!(is_code_detected(
+            "int main(){int hello = 3; cout<<hello<<'\n'; return 0;}",
+            2
+        ));
     }
 }
 
@@ -46,8 +49,9 @@ async fn run() {
     let bot_responses_to_messages = Arc::new(Mutex::new(HashMap::<i32, i32>::new()));
     let bot_responses_to_edited_messages = bot_responses_to_messages.clone();
 
-    let bot_dispatcher = Dispatcher::new(bot.clone())
-        .messages_handler(move |rx: DispatcherHandlerRx<Message>| {
+    let mut bot_dispatcher = Dispatcher::new(bot.clone())
+        .messages_handler(move |rx: DispatcherHandlerRx<Bot, Message>| {
+            let rx = tokio_stream::wrappers::UnboundedReceiverStream::new(rx);
             rx.for_each(move |message| {
                 let bot_responses_to_messages = bot_responses_to_messages.clone();
                 async move {
@@ -70,7 +74,7 @@ async fn run() {
 
                     // If message is formatted - just ignore it
                     if detection::maybe_formatted(message.update.entities()) {
-                        return
+                        return;
                     }
 
                     if detection::is_code_detected(message_text, threshold) {
@@ -79,7 +83,8 @@ async fn run() {
                 }
             })
         })
-        .edited_messages_handler(move |rx: DispatcherHandlerRx<Message>| {
+        .edited_messages_handler(move |rx: DispatcherHandlerRx<Bot, Message>| {
+            let rx = tokio_stream::wrappers::UnboundedReceiverStream::new(rx);
             rx.for_each(move |message| {
                 let bot_responses_to_messages = bot_responses_to_edited_messages.clone();
                 async move {
@@ -99,7 +104,7 @@ async fn run() {
                         if let Some(response) = maybe_bot_answer_id {
                             // Clear all related to the message bot responses
                             utils::delete_message(
-                                &message.bot,
+                                &message.requester,
                                 message.chat_id(),
                                 response,
                                 bot_responses_to_messages.clone(),
@@ -118,7 +123,7 @@ async fn run() {
 
                         if let Some(old_id) = old_notification {
                             utils::delete_message(
-                                &message.bot,
+                                &message.requester,
                                 message.chat_id(),
                                 old_id,
                                 bot_responses_to_messages.clone(),
@@ -142,14 +147,13 @@ async fn run() {
                 LoggingErrorHandler::with_custom_text("An error from the update listener"),
             )
             .await;
-        return
+        return;
     }
 
     log::info!("Long polling mode activated");
     bot.delete_webhook()
-            .send()
-            .await
-            .expect("Cannot delete a webhook");
-    bot_dispatcher.dispatch()
-        .await;
+        .send()
+        .await
+        .expect("Cannot delete a webhook");
+    bot_dispatcher.dispatch().await;
 }

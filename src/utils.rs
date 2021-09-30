@@ -5,9 +5,8 @@ use teloxide::Bot;
 use std::collections::HashMap;
 use std::sync::{Arc, Mutex};
 
-
 pub async fn send_first_notification(
-    message: &UpdateWithCx<Message>,
+    message: &UpdateWithCx<Bot, Message>,
     response_storage: Arc<Mutex<HashMap<i32, i32>>>,
 ) {
     static FORMAT_TEXT: &str = "Оберните код в теги: 3 символа ` до и после кода \
@@ -16,7 +15,7 @@ pub async fn send_first_notification(
 }
 
 pub async fn send_another_notification(
-    message: &UpdateWithCx<Message>,
+    message: &UpdateWithCx<Bot, Message>,
     response_storage: Arc<Mutex<HashMap<i32, i32>>>,
 ) {
     static ERROR_FORMAT_TEXT: &str =
@@ -26,7 +25,7 @@ pub async fn send_another_notification(
 }
 
 async fn send_message(
-    message: &UpdateWithCx<Message>,
+    message: &UpdateWithCx<Bot, Message>,
     text: &str,
     response_storage: Arc<Mutex<HashMap<i32, i32>>>,
 ) {
