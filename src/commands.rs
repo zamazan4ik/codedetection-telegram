@@ -1,6 +1,6 @@
-use teloxide::{prelude::*, utils::command::BotCommand};
+use teloxide::{prelude::*, utils::command::BotCommands};
 
-#[derive(BotCommand)]
+#[derive(Clone, BotCommands)]
 #[command(rename = "lowercase", description = "These commands are supported:")]
 pub enum Command {
     #[command(description = "display this text.")]
@@ -9,8 +9,9 @@ pub enum Command {
     About,
 }
 
-pub async fn command_answer(
-    cx: &UpdateWithCx<Bot, Message>,
+pub async fn command_handler(
+    msg: Message,
+    bot: AutoSend<Bot>,
     command: Command,
 ) -> anyhow::Result<()> {
     static HELP_TEXT: &str = "Для форматирования однострочной конструкции используйте\
@@ -21,8 +22,16 @@ pub async fn command_answer(
         https://github.com/ZaMaZaN4iK/codedetection-telegram . Спасибо!";
 
     match command {
-        Command::Help => cx.reply_to(HELP_TEXT).send().await?,
-        Command::About => cx.reply_to(ABOUT_TEXT).send().await?,
+        Command::Help => {
+            bot.send_message(msg.chat.id, HELP_TEXT)
+                .reply_to_message_id(msg.id)
+                .await?
+        }
+        Command::About => {
+            bot.send_message(msg.chat.id, ABOUT_TEXT)
+                .reply_to_message_id(msg.id)
+                .await?
+        }
     };
 
     Ok(())

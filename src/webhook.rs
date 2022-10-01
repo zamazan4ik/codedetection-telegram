@@ -1,10 +1,10 @@
-use std::env;
 use teloxide::prelude::*;
-use tokio::sync::mpsc;
 
 async fn telegram_request(
     input: String,
-    tx: axum::extract::Extension<mpsc::UnboundedSender<Result<teloxide::types::Update, String>>>,
+    tx: axum::extract::Extension<
+        tokio::sync::mpsc::UnboundedSender<Result<teloxide::types::Update, String>>,
+    >,
 ) -> impl axum::response::IntoResponse {
     let try_parse = match serde_json::from_str(&input) {
         Ok(update) => Ok(update),
@@ -28,34 +28,33 @@ async fn telegram_request(
 }
 
 pub async fn webhook(
-    bot: Bot,
+    bot: AutoSend<Bot>,
 ) -> impl teloxide::dispatching::update_listeners::UpdateListener<String> {
-    let bind_address = Result::unwrap_or(env::var("BIND_ADDRESS"), "0.0.0.0".to_string());
-    let bind_port: u16 = env::var("BIND_PORT")
-        .unwrap_or("8080".to_string())
+    let bind_address = Result::unwrap_or(std::env::var("BIND_ADDRESS"), "0.0.0.0".to_string());
+    let bind_port: u16 = std::env::var("BIND_PORT")
+        .unwrap_or_else(|_| "8080".to_string())
         .parse()
         .expect("BIND_PORT value has to be an integer");
 
-    let host = env::var("HOST").expect("HOST env variable missing");
-    let path = match env::var("WEBHOOK_URI") {
+    let host = std::env::var("HOST").expect("HOST env variable missing");
+    let path = match std::env::var("WEBHOOK_URI") {
         Ok(path) => path,
-        Err(_e) => env::var("TELOXIDE_TOKEN").expect("TELOXIDE_TOKEN env variable missing"),
+        Err(_e) => std::env::var("TELOXIDE_TOKEN").expect("TELOXIDE_TOKEN env variable missing"),
     };
     let url = format!("https://{}/{}", host, path);
 
     bot.set_webhook(url.parse().expect("Cannot parse a URL"))
-        .send()
         .await
         .expect("Cannot setup a webhook");
 
-    let (tx, rx) = mpsc::unbounded_channel();
+    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
 
     let app = axum::Router::new()
-        .route(path.as_str(), axum::handler::post(telegram_request))
+        .route(path.as_str(), axum::routing::post(telegram_request))
         .layer(
             tower::ServiceBuilder::new()
                 .layer(tower_http::trace::TraceLayer::new_for_http())
-                .layer(axum::AddExtensionLayer::new(tx))
+                .layer(tower_http::add_extension::AddExtensionLayer::new(tx))
                 .into_inner(),
         );
 
