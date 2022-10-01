@@ -1,8 +1,5 @@
-use once_cell::sync::OnceCell;
 use once_cell_regex::regex;
-use regex::Regex;
 use teloxide::types::*;
-
 
 pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
     let entities = match maybe_entities {
@@ -20,8 +17,9 @@ pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
 }
 
 pub fn is_code_detected(text: &str, threshold: u8) -> bool {
-    static INSTANCE: OnceCell<[&'static str; 76]> = OnceCell::new();
-    let re: &Regex = regex!(INSTANCE
+    static INSTANCE: once_cell::sync::OnceCell<[&'static str; 76]> =
+        once_cell::sync::OnceCell::new();
+    let re: &regex::Regex = regex!(INSTANCE
         .get_or_init(|| {
             [
                 "namespace",

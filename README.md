@@ -4,7 +4,7 @@
 Detect C++ code in Telegram messages and warn about proper code formatting.
 
 ### Dependencies
-* [Rust](https://www.rust-lang.org/) 1.55 or newer
+* [Rust](https://www.rust-lang.org/) 1.64 or newer
 * Cargo
 
 Older Rust versions possibly work but are not tested.
@@ -30,11 +30,11 @@ The bot can be configured only with environment variables. For now there are we 
 | HOST | Host, where Telegram will send updates in webhook mode | Any valid host address | None | Webhook mode |
 | WEBHOOK_URI | An URI path for webhook mode like **/api/v1/Te3@#ge** | Any valid URI path | TELOXIDE_TOKEN | Webhook mode |
 
-If for any variable there is no default value and you didn't provide any value - the bot won't start.
+If for any variable there is no default value, and you didn't provide any value - the bot won't start.
 Bot automatically registers webhook (if is launched in webhook mode) with address `https://$HOST/$TELOXIDE_TOKEN`.
 
 ### How to use
-Just add the bot tou your chat. If any user will write a message, which possibly is a C++ code - the bot will warn about it.
+Just add the bot tou your chat. If any user write a message, which possibly is a C++ code - the bot will warn about it.
 
 ### Code detection algorithm
 For now bot detects C++ code with very simple method: match with regular expression some keywords and if match count > `THRESHOLD` - send a warning.
