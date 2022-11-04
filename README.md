@@ -1,7 +1,7 @@
 # codedetection-telegram
 [![GitHub code size](https://img.shields.io/github/languages/code-size/ZaMaZaN4iK/codedetection-telegram?style=flat)](https://github.com/ZaMaZaN4iK/codedetection-telegram)
 ### About
-Detect C++ code in Telegram messages and warn about proper code formatting.
+Detect C++, Java, and Kotlin code in Telegram messages and warn about proper code formatting.
 
 ### Dependencies
 * [Rust](https://www.rust-lang.org/) 1.64 or newer
@@ -34,12 +34,12 @@ If for any variable there is no default value, and you didn't provide any value 
 Bot automatically registers webhook (if is launched in webhook mode) with address `https://$HOST/$TELOXIDE_TOKEN`.
 
 ### How to use
-Just add the bot tou your chat. If any user write a message, which possibly is a C++ code - the bot will warn about it.
+Just add the bot tou your chat. If any user writes a message, which possibly is a code - the bot will warn about it.
 
 ### Code detection algorithm
-For now bot detects C++ code with very simple method: match with regular expression some keywords and if match count > `THRESHOLD` - send a warning.
-So this algorithm has some false positives (detects some non-C++ code as C++ code) and false negatives (doesn't detect some 
-C++ code). Maybe in the future the algorithm will be improved.
+For now bot detects code with very simple method: match with regular expression some keywords and if match count > `THRESHOLD` - send a warning.
+So this algorithm has some false positives (detects some non-code as code) and false negatives (doesn't detect some 
+code). Maybe in the future the algorithm will be improved.
 
 ### Feedback
 If you have any suggestions or want to report a bug - feel free to create in issue in this repo. Thank you!

@@ -17,7 +17,7 @@ pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
 }
 
 pub fn is_code_detected(text: &str, threshold: u8) -> bool {
-    static INSTANCE: once_cell::sync::OnceCell<[&'static str; 76]> =
+    static INSTANCE: once_cell::sync::OnceCell<[&'static str; 118]> =
         once_cell::sync::OnceCell::new();
     let re: &regex::Regex = regex!(INSTANCE
         .get_or_init(|| {
@@ -98,6 +98,48 @@ pub fn is_code_detected(text: &str, threshold: u8) -> bool {
                 "double",
                 "void",
                 "vector",
+                "abstract", // Java
+                "boolean",
+                "byte",
+                "short",
+                "char",
+                "int",
+                "long",
+                "extends",
+                "finally",
+                "implements",
+                "instanceof",
+                "interface",
+                "native",
+                "super",
+                "synchronized",
+                "throws",
+                "null",
+                "true",
+                "false",
+                "fun", // Kotlin
+                "val",
+                "var",
+                "object",
+                "typealias",
+                "when",
+                "constructor",
+                "expect",
+                "actual",
+                "companion",
+                "inline",
+                "crossinline",
+                "noinline",
+                "external",
+                "infix",
+                "inner",
+                "internal",
+                "lateinit",
+                "operator",
+                "reified",
+                "sealed",
+                "suspend",
+                "vararg",
             ]
         })
         .join("|")
