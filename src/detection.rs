@@ -17,11 +17,15 @@ pub fn maybe_formatted(maybe_entities: Option<&[MessageEntity]>) -> bool {
 }
 
 pub fn is_code_detected(text: &str, threshold: u8) -> bool {
-    static INSTANCE: once_cell::sync::OnceCell<[&'static str; 118]> =
+    static INSTANCE: once_cell::sync::OnceCell<[&'static str; 122]> =
         once_cell::sync::OnceCell::new();
     let re: &regex::Regex = regex!(INSTANCE
         .get_or_init(|| {
             [
+                "\\[",
+                "\\]",
+                "{",
+                "}",
                 "namespace",
                 "main",
                 "cout",
